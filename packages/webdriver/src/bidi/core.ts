@@ -59,7 +59,15 @@ export class BidiCore {
             this.#ws.on('error', (err) => {
                 log.warn(`Couldn't connect to Bidi protocol: ${err.message}`)
                 this._isConnected = false
-                resolve(this._isConnected)
+                if (!this._isConnected) {
+                    log.info('Attempt to use IPv4...')
+                    this.#webSocketUrl = this.#webSocketUrl.replace('[::1]', '127.0.0.1')
+                    this.reconnect(this.#webSocketUrl)
+                    this._isConnected = true
+                    resolve(this._isConnected)
+                } else {
+                    resolve(this._isConnected)
+                }
             })
         })
         return this.#waitForConnected
