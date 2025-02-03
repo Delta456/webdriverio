@@ -119,12 +119,18 @@ export default class ConfigParser {
          */
         const filePath = this._pathService.ensureAbsolutePath(filename, process.cwd())
 
+        /**
+         * convert the absolute path to a file URL
+         * for universal support for all systems
+         */
+        const fileUrl = new URL(`file://${filePath}`)
+
         try {
             /**
              * Check if direct exports got assigned as default exports and if so
              * be more flexible and pick allow for these as well.
              */
-            const importedModule = await this._pathService.loadFile<ImportedConfigModule>(filePath)
+            const importedModule = await this._pathService.loadFile<ImportedConfigModule>(fileUrl.href)
             const config = (importedModule as ESMImport).config || (importedModule as DefaultImport).default?.config
             if (typeof config !== 'object') {
                 throw new Error(NO_NAMED_CONFIG_EXPORT)
